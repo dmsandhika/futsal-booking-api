@@ -98,17 +98,61 @@ func (h *CourtHandler) UpdateCourt(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid court ID"})
 		return
 	}
-	var court model.Court
-	if err := c.ShouldBindJSON(&court); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+
+	// Get the existing court for old image cleanup
+	oldCourt, err := h.Repo.GetCourtByID(uint(id))
+	if err != nil {
+		c.JSON(404, gin.H{"error": "Court not found"})
 		return
 	}
-	court.ID = uint(id)
+
+	name := c.PostForm("name")
+	price := c.PostForm("price")
+	location := c.PostForm("location")
+	status := c.PostForm("status")
+
+	var imagePath string = oldCourt.Image
+	file, err := c.FormFile("image")
+	if err == nil {
+		ext := strings.ToLower(filepath.Ext(file.Filename))
+		allowedExts := map[string]bool{".jpg": true, ".jpeg": true, ".png": true}
+		if !allowedExts[ext] {
+			c.JSON(400, gin.H{"error": "Invalid image format"})
+			return
+		}
+		uploadPath := "uploads/courts"
+		os.MkdirAll(uploadPath, os.ModePerm)
+		filename := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
+		imagePath = filepath.Join(uploadPath, filename)
+		if err := c.SaveUploadedFile(file, imagePath); err != nil {
+			c.JSON(500, gin.H{"error": "Failed to upload image"})
+			return
+		}
+		// Delete old image if exists and different
+		if oldCourt.Image != "" && oldCourt.Image != imagePath {
+			_ = os.Remove(oldCourt.Image)
+		}
+	}
+
+	priceInt, err := strconv.Atoi(price)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid price format"})
+		return
+	}
+
+	court := model.Court{
+		ID:           uint(id),
+		Name:         name,
+		Location:     location,
+		PricePerHour: priceInt,
+		Status:       status,
+		Image:        imagePath,
+	}
 	if err := h.Repo.UpdateCourt(&court); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, gin.H{"message": "Court updated successfully"})
+	c.JSON(200, gin.H{"message": "Court updated successfully", "data": court})
 }
 
 func (h *CourtHandler) DeleteCourt(c *gin.Context) {
@@ -118,9 +162,19 @@ func (h *CourtHandler) DeleteCourt(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid court ID"})
 		return
 	}
+	// Get court to find image path
+	court, err := h.Repo.GetCourtByID(uint(id))
+	if err != nil {
+		c.JSON(404, gin.H{"error": "Court not found"})
+		return
+	}
+	// Delete court from DB
 	if err := h.Repo.DeleteCourt(uint(id)); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
+	}
+	if court.Image != "" {
+		_ = os.Remove(court.Image)
 	}
 	c.JSON(200, gin.H{"message": "Court deleted successfully"})
 }
