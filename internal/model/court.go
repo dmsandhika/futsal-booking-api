@@ -10,7 +10,7 @@ type Court struct {
 	Location      string `gorm:"type:varchar(255)"`
 	PricePerHour  int
 	Status        string
-	TimeSlots     string `gorm:"type:text"`
+	Image         string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }
