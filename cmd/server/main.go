@@ -18,15 +18,16 @@ func main() {
 	godotenv.Load()
 
 	db := config.InitDB()
-	db.AutoMigrate(&model.Court{})
+	db.AutoMigrate(&model.Court{}, &model.Admin{})
 
 	
 	courtRepo := &repository.CourtRepository{DB: db}
 	courtHandler := &handler.CourtHandler{Repo: courtRepo}
+	adminRepo := &repository.AdminRepository{DB: db}
+	authHandler := &handler.AuthHandler{Repo: adminRepo}
 
 	r := gin.Default()
 	r.Static("/uploads", "./uploads")
-	router.SetupCourtRoutes(r, courtHandler)
-
+	router.SetupCourtRoutes(r, authHandler, courtHandler)
 	log.Fatal(r.Run(":" + os.Getenv("APP_PORT")))
 }

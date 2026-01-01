@@ -4,10 +4,18 @@ import (
 	"futsal-booking/internal/handler"
 
 	"github.com/gin-gonic/gin"
+	"futsal-booking/internal/middleware"
 )
 
 func SetupCourtRoutes(r *gin.Engine, 
-	courtHandler *handler.CourtHandler){
+	authHandler *handler.AuthHandler,
+	courtHandler *handler.CourtHandler,){
+	auth := r.Group("/auth")
+	{
+		auth.POST("/login", authHandler.Login)
+		auth.POST("/register", authHandler.Register)
+		auth.GET("/me", middleware.JWTAuth(), authHandler.GetMe)
+	}
 	courts := r.Group("/courts")
 	{
 		courts.GET("/", courtHandler.GetAllCourts)
