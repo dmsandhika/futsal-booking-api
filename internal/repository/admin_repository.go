@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"gorm.io/gorm"
 	"futsal-booking/internal/model"
+	"gorm.io/gorm"
 )
 
 type AdminRepository struct {

@@ -1,13 +1,13 @@
 package handler
 
 import (
+	"fmt"
 	"futsal-booking/internal/model"
 	"futsal-booking/internal/repository"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
-	"path/filepath"
-	"os"
-	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -42,14 +42,14 @@ func (h *CourtHandler) GetAllCourts(c *gin.Context) {
 	var result []gin.H
 	for _, court := range courts {
 		result = append(result, gin.H{
-			"id": court.ID,
-			"name": court.Name,
-			"description": court.Description,
+			"id":             court.ID,
+			"name":           court.Name,
+			"description":    court.Description,
 			"price_per_hour": court.PricePerHour,
-			"image": court.Image,
-			"features": court.Features,
-			"created_at": court.CreatedAt,
-			"updated_at": court.UpdatedAt,
+			"image":          court.Image,
+			"features":       court.Features,
+			"created_at":     court.CreatedAt,
+			"updated_at":     court.UpdatedAt,
 		})
 	}
 	totalPages := (int(total) + limit - 1) / limit
@@ -59,7 +59,7 @@ func (h *CourtHandler) GetAllCourts(c *gin.Context) {
 func (h *CourtHandler) CreateCourt(c *gin.Context) {
 	name := c.PostForm("name")
 	price := c.PostForm("price")
-    
+
 	if name == "" || price == "" {
 		c.JSON(400, gin.H{"error": "Name and Price are required"})
 		return
@@ -91,8 +91,6 @@ func (h *CourtHandler) CreateCourt(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid price format"})
 		return
 	}
-
-
 
 	// Ambil dan filter features agar tidak ada nilai kosong/null
 	featuresArr := c.PostFormArray("features[]")
@@ -141,14 +139,14 @@ func (h *CourtHandler) GetCourtByID(c *gin.Context) {
 		return
 	}
 	result := gin.H{
-		"id": court.ID,
-		"name": court.Name,
-		"description": court.Description,
+		"id":             court.ID,
+		"name":           court.Name,
+		"description":    court.Description,
 		"price_per_hour": court.PricePerHour,
-		"image": court.Image,
-		"features": court.Features,
-		"created_at": court.CreatedAt,
-		"updated_at": court.UpdatedAt,
+		"image":          court.Image,
+		"features":       court.Features,
+		"created_at":     court.CreatedAt,
+		"updated_at":     court.UpdatedAt,
 	}
 	c.JSON(200, gin.H{"message": "Court retrieved successfully", "data": result})
 }

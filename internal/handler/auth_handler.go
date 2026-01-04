@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"net/http"
-	"golang.org/x/crypto/bcrypt"
-	"github.com/gin-gonic/gin"
-	"futsal-booking/internal/utils"
-	"futsal-booking/internal/repository"
 	"futsal-booking/internal/model"
+	"futsal-booking/internal/repository"
+	"futsal-booking/internal/utils"
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+	"net/http"
 )
 
 type AuthHandler struct {
@@ -26,43 +26,43 @@ type RegisterRequest struct {
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
-   var req LoginRequest
-   if err := c.ShouldBindJSON(&req); err != nil {
-	   c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-	   return
-   }
+	var req LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
 
-   var admin *model.Admin
-   var err error
-   if req.Identity == "" {
-	   c.JSON(http.StatusBadRequest, gin.H{"error": "Identity required"})
-	   return
-   }
+	var admin *model.Admin
+	var err error
+	if req.Identity == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Identity required"})
+		return
+	}
 
-   // Try username first, then email
-   admin, err = h.Repo.GetAdminByUsername(req.Identity)
-   if err != nil {
-	   admin, err = h.Repo.GetAdminByEmail(req.Identity)
-   }
+	// Try username first, then email
+	admin, err = h.Repo.GetAdminByUsername(req.Identity)
+	if err != nil {
+		admin, err = h.Repo.GetAdminByEmail(req.Identity)
+	}
 
-   if err != nil {
-	   c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid identity or password"})
-	   return
-   }
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid identity or password"})
+		return
+	}
 
-   // Compare hashed password
-   if bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(req.Password)) != nil {
-	   c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid identity or password"})
-	   return
-   }
+	// Compare hashed password
+	if bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(req.Password)) != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid identity or password"})
+		return
+	}
 
-   token, err := utils.GenerateJWT(int(admin.ID))
-   if err != nil {
-	   c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
-	   return
-   }
+	token, err := utils.GenerateJWT(int(admin.ID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
 
-   c.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": token})
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": token})
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -134,8 +134,8 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"id": admin.ID,
+		"id":       admin.ID,
 		"username": admin.Username,
-		"email": admin.Email,
+		"email":    admin.Email,
 	})
 }

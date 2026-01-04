@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"futsal-booking/internal/model"	
-	"gorm.io/gorm"
+	"futsal-booking/internal/model"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type CourtRepository struct {

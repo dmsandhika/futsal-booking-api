@@ -43,12 +43,12 @@ func (s *StringArray) Scan(value interface{}) error {
 }
 
 type Court struct {
-	ID            uuid.UUID   `gorm:"type:char(36);primaryKey"`
-	Name          string
-	Description   string      `gorm:"type:varchar(255);null"`
-	PricePerHour  int
-	Image         string
-	Features      StringArray `gorm:"type:json"`
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID           uuid.UUID `gorm:"type:char(36);primaryKey"`
+	Name         string
+	Description  string `gorm:"type:varchar(255);null"`
+	PricePerHour int
+	Image        string
+	Features     StringArray `gorm:"type:json"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }

@@ -20,13 +20,15 @@ func main() {
 	db := config.InitDB()
 	db.AutoMigrate(&model.Court{}, &model.Admin{}, &model.Booking{})
 
-	
 	courtRepo := &repository.CourtRepository{DB: db}
 	courtHandler := &handler.CourtHandler{Repo: courtRepo}
 	adminRepo := &repository.AdminRepository{DB: db}
 	authHandler := &handler.AuthHandler{Repo: adminRepo}
 	bookingRepo := &repository.BookingRepository{DB: db}
-	bookingHandler := &handler.BookingHandler{Repo: bookingRepo}
+	bookingHandler := &handler.BookingHandler{
+		Repo:      bookingRepo,
+		CourtRepo: courtRepo,
+	}
 
 	r := gin.Default()
 	r.Static("/uploads", "./uploads")

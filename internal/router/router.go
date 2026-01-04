@@ -3,15 +3,16 @@ package router
 import (
 	"futsal-booking/internal/handler"
 
-	"github.com/gin-gonic/gin"
 	"futsal-booking/internal/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
-func SetupCourtRoutes(r *gin.Engine, 
+func SetupCourtRoutes(r *gin.Engine,
 	authHandler *handler.AuthHandler,
 	courtHandler *handler.CourtHandler,
 	bookingHandler *handler.BookingHandler,
-	){
+) {
 	auth := r.Group("/auth")
 	{
 		auth.POST("/login", authHandler.Login)
@@ -29,7 +30,7 @@ func SetupCourtRoutes(r *gin.Engine,
 	bookings := r.Group("/bookings")
 	{
 		bookings.GET("/", bookingHandler.GetBookings)
-		// bookings.POST("/", bookingHandler.CreateBooking)
+		bookings.POST("/", bookingHandler.CreateBooking)
 		// bookings.GET("/:id", bookingHandler.GetBookingByID)
 		// bookings.GET("/user/:name", bookingHandler.GetBookingsByUserName)
 		// bookings.PUT("/:id", bookingHandler.UpdateBooking)

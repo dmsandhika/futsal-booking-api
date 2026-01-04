@@ -1,22 +1,21 @@
-
 package repository
 
 import (
+	"futsal-booking/internal/model"
 	"time"
-	"futsal-booking/internal/model"	
-	"gorm.io/gorm"
+
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type BookingRepository struct {
 	DB *gorm.DB
 }
 
-
 func (r *BookingRepository) GetBookings(courtID *uuid.UUID, bookingDate *time.Time, limit, offset int) ([]model.Booking, int64, error) {
 	var bookings []model.Booking
 	var total int64
-	db := r.DB.Model(&model.Booking{})
+	db := r.DB.Model(&model.Booking{}).Preload("Court")
 	if courtID != nil {
 		db = db.Where("court_id = ?", *courtID)
 	}
@@ -27,7 +26,6 @@ func (r *BookingRepository) GetBookings(courtID *uuid.UUID, bookingDate *time.Ti
 	result := db.Limit(limit).Offset(offset).Find(&bookings)
 	return bookings, total, result.Error
 }
-
 
 func (r *BookingRepository) CreateBooking(booking *model.Booking) error {
 	result := r.DB.Create(booking)
