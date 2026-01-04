@@ -15,6 +15,15 @@ func (r *CourtRepository) GetAllCourts() ([]model.Court, error) {
 	return courts, result.Error
 }
 
+func (r *CourtRepository) GetAllCourtsPaginated(page, limit int) ([]model.Court, int64, error) {
+	var courts []model.Court
+	var total int64
+
+	offset := (page - 1) * limit
+	result := r.DB.Model(&model.Court{}).Count(&total).Offset(offset).Limit(limit).Find(&courts)
+	return courts, total, result.Error
+}
+
 func (r *CourtRepository) CreateCourt(court *model.Court) error {
 	result := r.DB.Create(court)
 	return result.Error

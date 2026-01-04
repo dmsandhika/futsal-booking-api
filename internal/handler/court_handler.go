@@ -18,7 +18,22 @@ type CourtHandler struct {
 }
 
 func (h *CourtHandler) GetAllCourts(c *gin.Context) {
-	courts, err := h.Repo.GetAllCourts()
+	page := 1
+	limit := 10
+
+	if p := c.Query("page"); p != "" {
+		if parsedPage, err := strconv.Atoi(p); err == nil && parsedPage > 0 {
+			page = parsedPage
+		}
+	}
+
+	if l := c.Query("limit"); l != "" {
+		if parsedLimit, err := strconv.Atoi(l); err == nil && parsedLimit > 0 {
+			limit = parsedLimit
+		}
+	}
+
+	courts, total, err := h.Repo.GetAllCourtsPaginated(page, limit)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -36,7 +51,8 @@ func (h *CourtHandler) GetAllCourts(c *gin.Context) {
 			"updated_at": court.UpdatedAt,
 		})
 	}
-	c.JSON(200, gin.H{"message": "Courts retrieved successfully", "data": result})
+	totalPages := (int(total) + limit - 1) / limit
+	c.JSON(200, gin.H{"message": "Courts retrieved successfully", "data": result, "pagination": gin.H{"page": page, "limit": limit, "total": total, "total_pages": totalPages}})
 }
 
 func (h *CourtHandler) CreateCourt(c *gin.Context) {
