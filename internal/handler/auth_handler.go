@@ -114,27 +114,28 @@ func (h *AuthHandler) Register(c *gin.Context) {
 }
 
 func (h *AuthHandler) GetMe(c *gin.Context) {
-	   adminIDVal, exists := c.Get("admin_id")
-	   if !exists {
-		   c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		   return
-	   }
-	   var adminID uint
-	   switch v := adminIDVal.(type) {
-	   case float64:
-		   adminID = uint(v)
-	   case int:
-		   adminID = uint(v)
+	adminIDVal, exists := c.Get("admin_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	var adminID uint
+	switch v := adminIDVal.(type) {
+	case float64:
+		adminID = uint(v)
+	case int:
+		adminID = uint(v)
+	}
 
-	   admin, err := h.Repo.GetAdminByID(adminID)
-	   if err != nil {
-		   c.JSON(http.StatusNotFound, gin.H{"error": "Admin not found"})
-		   return
-	   }
+	admin, err := h.Repo.GetAdminByID(adminID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Admin not found"})
+		return
+	}
 
-	   c.JSON(http.StatusOK, gin.H{
-		   "id": admin.ID,
-		   "username": admin.Username,
-		   "email": admin.Email,
-	   })
+	c.JSON(http.StatusOK, gin.H{
+		"id": admin.ID,
+		"username": admin.Username,
+		"email": admin.Email,
+	})
 }
