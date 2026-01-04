@@ -12,7 +12,7 @@ type BookingRepository struct {
 	DB *gorm.DB
 }
 
-func (r *BookingRepository) GetBookings(courtID *uuid.UUID, bookingDate *time.Time, limit, offset int) ([]model.Booking, int64, error) {
+func (r *BookingRepository) GetBookings(courtID *uuid.UUID, bookingDate *time.Time, timeSlot string, limit, offset int) ([]model.Booking, int64, error) {
 	var bookings []model.Booking
 	var total int64
 	db := r.DB.Model(&model.Booking{}).Preload("Court")
@@ -21,6 +21,9 @@ func (r *BookingRepository) GetBookings(courtID *uuid.UUID, bookingDate *time.Ti
 	}
 	if bookingDate != nil {
 		db = db.Where("booking_date = ?", *bookingDate)
+	}
+	if timeSlot != "" {
+		db = db.Where("time_slot = ?", timeSlot)
 	}
 	db.Count(&total)
 	result := db.Limit(limit).Offset(offset).Find(&bookings)

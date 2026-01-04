@@ -39,6 +39,7 @@ func parseDate(s string) time.Time {
 func (h *BookingHandler) GetBookings(c *gin.Context) {
 	courtIDParam := c.Query("court_id")
 	bookingDateParam := c.Query("booking_date")
+	timeSlot := c.Query("time_slot")
 	pageStr := c.DefaultQuery("page", "1")
 	limitStr := c.DefaultQuery("limit", "10")
 
@@ -62,7 +63,7 @@ func (h *BookingHandler) GetBookings(c *gin.Context) {
 	}
 	offset := (page - 1) * limit
 
-	bookings, total, err := h.Repo.GetBookings(&courtID, &bookingDate, limit, offset)
+	bookings, total, err := h.Repo.GetBookings(&courtID, &bookingDate, timeSlot, limit, offset)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -111,6 +112,17 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid court_id format"})
 		return
 	}
+
+	// Cek booking duplikat
+	bookingDate := parseDate(req.BookingDate)
+	existing, _, err := h.Repo.GetBookings(&courtUUID, &bookingDate, req.TimeSlot, 100, 0)
+	for _, b := range existing {
+		if b.TimeSlot == req.TimeSlot {
+			c.JSON(400, gin.H{"error": "Booking untuk lapangan, tanggal, dan jam tersebut sudah ada"})
+			return
+		}
+	}
+
 	court, err := h.CourtRepo.GetCourtByID(courtUUID)
 	if err != nil || court == nil {
 		c.JSON(400, gin.H{"error": "court_id not found"})
