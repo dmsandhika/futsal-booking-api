@@ -3,6 +3,7 @@ package repository
 import (
 	"futsal-booking/internal/model"	
 	"gorm.io/gorm"
+	"github.com/google/uuid"
 )
 
 type CourtRepository struct {
@@ -29,9 +30,9 @@ func (r *CourtRepository) CreateCourt(court *model.Court) error {
 	return result.Error
 }
 
-func (r *CourtRepository) GetCourtByID(id uint) (*model.Court, error) {
+func (r *CourtRepository) GetCourtByID(id uuid.UUID) (*model.Court, error) {
 	var court model.Court
-	result := r.DB.First(&court, id)
+	result := r.DB.First(&court, "id = ?", id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -43,7 +44,7 @@ func (r *CourtRepository) UpdateCourt(court *model.Court) error {
 	return result.Error
 }
 
-func (r *CourtRepository) DeleteCourt(id uint) error {
-	result := r.DB.Delete(&model.Court{}, id)
+func (r *CourtRepository) DeleteCourt(id uuid.UUID) error {
+	result := r.DB.Delete(&model.Court{}, "id = ?", id)
 	return result.Error
 }

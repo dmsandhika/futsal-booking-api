@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type StringArray []string
@@ -41,7 +43,7 @@ func (s *StringArray) Scan(value interface{}) error {
 }
 
 type Court struct {
-	ID            uint        `gorm:"primaryKey"`
+	ID            uuid.UUID   `gorm:"type:char(36);primaryKey"`
 	Name          string
 	Description   string      `gorm:"type:varchar(255);null"`
 	PricePerHour  int

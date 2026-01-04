@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type CourtHandler struct {
@@ -113,6 +114,7 @@ func (h *CourtHandler) CreateCourt(c *gin.Context) {
 	}
 
 	court := model.Court{
+		ID:           uuid.New(),
 		Name:         name,
 		Description:  c.PostForm("description"),
 		PricePerHour: priceInt,
@@ -128,12 +130,12 @@ func (h *CourtHandler) CreateCourt(c *gin.Context) {
 
 func (h *CourtHandler) GetCourtByID(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "Invalid court ID"})
 		return
 	}
-	court, err := h.Repo.GetCourtByID(uint(id))
+	court, err := h.Repo.GetCourtByID(id)
 	if err != nil {
 		c.JSON(404, gin.H{"error": "Court not found"})
 		return
@@ -153,14 +155,14 @@ func (h *CourtHandler) GetCourtByID(c *gin.Context) {
 
 func (h *CourtHandler) UpdateCourt(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "Invalid court ID"})
 		return
 	}
 
 	// Get the existing court for old image cleanup
-	oldCourt, err := h.Repo.GetCourtByID(uint(id))
+	oldCourt, err := h.Repo.GetCourtByID(id)
 	if err != nil {
 		c.JSON(404, gin.H{"error": "Court not found"})
 		return
@@ -214,7 +216,7 @@ func (h *CourtHandler) UpdateCourt(c *gin.Context) {
 	}
 
 	court := model.Court{
-		ID:           uint(id),
+		ID:           id,
 		Name:         name,
 		Description:  description,
 		PricePerHour: priceInt,
@@ -230,19 +232,19 @@ func (h *CourtHandler) UpdateCourt(c *gin.Context) {
 
 func (h *CourtHandler) DeleteCourt(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "Invalid court ID"})
 		return
 	}
 	// Get court to find image path
-	court, err := h.Repo.GetCourtByID(uint(id))
+	court, err := h.Repo.GetCourtByID(id)
 	if err != nil {
 		c.JSON(404, gin.H{"error": "Court not found"})
 		return
 	}
 	// Delete court from DB
-	if err := h.Repo.DeleteCourt(uint(id)); err != nil {
+	if err := h.Repo.DeleteCourt(id); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
