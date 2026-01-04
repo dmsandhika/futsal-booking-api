@@ -23,14 +23,27 @@ func (h *CourtHandler) GetAllCourts(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, gin.H{"message": "Courts retrieved successfully", "data": courts})
+	var result []gin.H
+	for _, court := range courts {
+		result = append(result, gin.H{
+			"id": court.ID,
+			"name": court.Name,
+			"description": court.Description,
+			"price_per_hour": court.PricePerHour,
+			"image": court.Image,
+			"features": court.Features,
+			"created_at": court.CreatedAt,
+			"updated_at": court.UpdatedAt,
+		})
+	}
+	c.JSON(200, gin.H{"message": "Courts retrieved successfully", "data": result})
 }
 
 func (h *CourtHandler) CreateCourt(c *gin.Context) {
 	name := c.PostForm("name")
 	price := c.PostForm("price")
-	
-	if(name == "" || price == "") {
+    
+	if name == "" || price == "" {
 		c.JSON(400, gin.H{"error": "Name and Price are required"})
 		return
 	}
@@ -47,7 +60,7 @@ func (h *CourtHandler) CreateCourt(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid image format"})
 		return
 	}
-	uploadPath :="uploads/courts"
+	uploadPath := "uploads/courts"
 	os.MkdirAll(uploadPath, os.ModePerm)
 	filename := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
 	filepath := filepath.Join(uploadPath, filename)
@@ -61,13 +74,34 @@ func (h *CourtHandler) CreateCourt(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid price format"})
 		return
 	}
-	
+
+
+
+	// Ambil dan filter features agar tidak ada nilai kosong/null
+	featuresArr := c.PostFormArray("features[]")
+	var filteredFeatures []string
+	for _, f := range featuresArr {
+		if f != "" && f != "null" {
+			filteredFeatures = append(filteredFeatures, f)
+		}
+	}
+	if len(filteredFeatures) == 0 {
+		// fallback jika frontend kirim "features" saja
+		singleFeature := c.PostForm("features")
+		if singleFeature != "" && singleFeature != "null" {
+			filteredFeatures = []string{singleFeature}
+		}
+	}
+	if filteredFeatures == nil {
+		filteredFeatures = []string{}
+	}
+
 	court := model.Court{
 		Name:         name,
-		Location:     c.PostForm("location"),
+		Description:  c.PostForm("description"),
 		PricePerHour: priceInt,
-		Status:       "active",
 		Image:        filepath,
+		Features:     model.StringArray(filteredFeatures),
 	}
 	if err := h.Repo.CreateCourt(&court); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -88,7 +122,17 @@ func (h *CourtHandler) GetCourtByID(c *gin.Context) {
 		c.JSON(404, gin.H{"error": "Court not found"})
 		return
 	}
-	c.JSON(200, gin.H{"message": "Court retrieved successfully", "data": court})
+	result := gin.H{
+		"id": court.ID,
+		"name": court.Name,
+		"description": court.Description,
+		"price_per_hour": court.PricePerHour,
+		"image": court.Image,
+		"features": court.Features,
+		"created_at": court.CreatedAt,
+		"updated_at": court.UpdatedAt,
+	}
+	c.JSON(200, gin.H{"message": "Court retrieved successfully", "data": result})
 }
 
 func (h *CourtHandler) UpdateCourt(c *gin.Context) {
@@ -108,8 +152,7 @@ func (h *CourtHandler) UpdateCourt(c *gin.Context) {
 
 	name := c.PostForm("name")
 	price := c.PostForm("price")
-	location := c.PostForm("location")
-	status := c.PostForm("status")
+	description := c.PostForm("description")
 
 	var imagePath string = oldCourt.Image
 	file, err := c.FormFile("image")
@@ -140,12 +183,26 @@ func (h *CourtHandler) UpdateCourt(c *gin.Context) {
 		return
 	}
 
+	featuresArr := c.PostFormArray("features[]")
+	var filteredFeatures []string
+	for _, f := range featuresArr {
+		if f != "" && f != "null" {
+			filteredFeatures = append(filteredFeatures, f)
+		}
+	}
+	if len(filteredFeatures) == 0 {
+		singleFeature := c.PostForm("features")
+		if singleFeature != "" {
+			filteredFeatures = []string{singleFeature}
+		}
+	}
+
 	court := model.Court{
 		ID:           uint(id),
 		Name:         name,
-		Location:     location,
+		Description:  description,
 		PricePerHour: priceInt,
-		Status:       status,
+		Features:     model.StringArray(filteredFeatures),
 		Image:        imagePath,
 	}
 	if err := h.Repo.UpdateCourt(&court); err != nil {
