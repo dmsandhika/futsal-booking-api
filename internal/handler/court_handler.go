@@ -1,14 +1,13 @@
 package handler
 
 import (
-	"fmt"
 	"futsal-booking/internal/model"
 	"futsal-booking/internal/repository"
+	"futsal-booking/internal/utils"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -77,12 +76,11 @@ func (h *CourtHandler) CreateCourt(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid image format"})
 		return
 	}
-	uploadPath := "uploads/courts"
-	os.MkdirAll(uploadPath, os.ModePerm)
-	filename := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
-	filepath := filepath.Join(uploadPath, filename)
-	if err := c.SaveUploadedFile(file, filepath); err != nil {
-		c.JSON(500, gin.H{"error": "Failed to upload image"})
+
+	// Upload to Supabase
+	imagePath, err := utils.UploadImageToSupabase(file, os.Getenv("SUPABASE_BUCKET"))
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to upload image: " + err.Error()})
 		return
 	}
 
@@ -116,7 +114,7 @@ func (h *CourtHandler) CreateCourt(c *gin.Context) {
 		Name:         name,
 		Description:  c.PostForm("description"),
 		PricePerHour: priceInt,
-		Image:        filepath,
+		Image:        imagePath,
 		Features:     model.StringArray(filteredFeatures),
 	}
 	if err := h.Repo.CreateCourt(&court); err != nil {
@@ -179,17 +177,18 @@ func (h *CourtHandler) UpdateCourt(c *gin.Context) {
 			c.JSON(400, gin.H{"error": "Invalid image format"})
 			return
 		}
-		uploadPath := "uploads/courts"
-		os.MkdirAll(uploadPath, os.ModePerm)
-		filename := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
-		imagePath = filepath.Join(uploadPath, filename)
-		if err := c.SaveUploadedFile(file, imagePath); err != nil {
-			c.JSON(500, gin.H{"error": "Failed to upload image"})
+
+		// Upload to Supabase
+		newImagePath, err := utils.UploadImageToSupabase(file, os.Getenv("SUPABASE_BUCKET"))
+		if err != nil {
+			c.JSON(500, gin.H{"error": "Failed to upload image: " + err.Error()})
 			return
 		}
-		// Delete old image if exists and different
-		if oldCourt.Image != "" && oldCourt.Image != imagePath {
-			_ = os.Remove(oldCourt.Image)
+		imagePath = newImagePath
+
+		// Delete old image if exists
+		if oldCourt.Image != "" {
+			_ = utils.DeleteImageFromSupabase(oldCourt.Image, os.Getenv("SUPABASE_BUCKET"))
 		}
 	}
 
@@ -246,8 +245,9 @@ func (h *CourtHandler) DeleteCourt(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
+	// Delete image from Supabase
 	if court.Image != "" {
-		_ = os.Remove(court.Image)
+		_ = utils.DeleteImageFromSupabase(court.Image, os.Getenv("SUPABASE_BUCKET"))
 	}
 	c.JSON(200, gin.H{"message": "Court deleted successfully"})
 }
