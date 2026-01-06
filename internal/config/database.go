@@ -13,11 +13,17 @@ func InitDB() *gorm.DB {
 		" password=" + os.Getenv("DB_PASS") +
 		" dbname=" + os.Getenv("DB_NAME") +
 		" port=" + os.Getenv("DB_PORT") +
-		" sslmode=require"
+		" sslmode=require" +
+		" search_path=" + os.Getenv("DB_SCHEMA")
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("Failed to connect database")
 	}
+	
+	// Ensure schema exists and set search path
+	db.Exec("CREATE SCHEMA IF NOT EXISTS " + os.Getenv("DB_SCHEMA"))
+	db.Exec("SET search_path TO " + os.Getenv("DB_SCHEMA"))
+	
 	return db
 }
