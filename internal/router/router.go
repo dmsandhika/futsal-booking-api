@@ -31,10 +31,8 @@ func SetupCourtRoutes(r *gin.Engine,
 	{
 		bookings.GET("/", bookingHandler.GetBookings)
 		bookings.POST("/", bookingHandler.CreateBooking)
-		// bookings.GET("/:id", bookingHandler.GetBookingByID)
-		// bookings.GET("/user/:name", bookingHandler.GetBookingsByUserName)
-		// bookings.PUT("/:id", bookingHandler.UpdateBooking)
-		// bookings.DELETE("/:id", bookingHandler.DeleteBooking)
+		bookings.PUT("/:id/payment-status", bookingHandler.UpdatePaymentStatus)
+		bookings.PUT("/:id/cancel", bookingHandler.CancelBooking)
 
 	}
 }

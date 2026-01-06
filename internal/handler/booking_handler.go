@@ -117,7 +117,7 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 	bookingDate := parseDate(req.BookingDate)
 	existing, _, err := h.Repo.GetBookings(&courtUUID, &bookingDate, req.TimeSlot, 100, 0)
 	for _, b := range existing {
-		if b.TimeSlot == req.TimeSlot {
+		if b.TimeSlot == req.TimeSlot && b.Status != model.StatusCancelled {
 			c.JSON(400, gin.H{"error": "Booking untuk lapangan, tanggal, dan jam tersebut sudah ada"})
 			return
 		}
@@ -152,3 +152,66 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 	}
 	c.JSON(201, gin.H{"message": "Booking created successfully", "data": booking})
 }
+
+func (h*BookingHandler) UpdatePaymentStatus(c *gin.Context) {
+	bookingId := c.Param("id")
+	bookingUUID, err := uuid.Parse(bookingId)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid booking ID"})
+		return
+	}
+	booking, err := h.Repo.GetBookingByID(bookingUUID)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if booking == nil {
+		c.JSON(404, gin.H{"error": "Booking not found"})
+		return
+	}
+	var req struct {
+		PaymentStatus string `json:"payment_status"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	if(req.PaymentStatus == string(model.PaymentStatusPaid)){
+		booking.RemainingAmount = 0
+		booking.Status = model.StatusConfirmed
+	}
+	booking.PaymentStatus = model.PaymentStatus(req.PaymentStatus)
+	booking.UpdatedAt = time.Now()
+	if err := h.Repo.UpdateBooking(booking); err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"message": "Booking payment status updated successfully", "data": booking})
+}
+
+func (h *BookingHandler) CancelBooking (c *gin.Context) {
+	bookingId := c.Param("id")
+	bookingUUID, err := uuid.Parse(bookingId)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid booking ID"})
+		return
+	}
+	booking, err := h.Repo.GetBookingByID(bookingUUID)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if booking == nil {
+		c.JSON(404, gin.H{"error": "Booking not found"})
+		return
+	}
+	booking.Status = model.StatusCancelled
+	booking.UpdatedAt = time.Now()
+	if err := h.Repo.UpdateBooking(booking); err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"message": "Booking cancelled successfully", "data": booking})
+}
+
+
