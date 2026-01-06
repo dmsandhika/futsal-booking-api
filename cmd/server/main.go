@@ -33,5 +33,5 @@ func main() {
 	r := gin.Default()
 	r.Static("/uploads", "./uploads")
 	router.SetupCourtRoutes(r, authHandler, courtHandler, bookingHandler)
-	log.Fatal(r.Run(":" + os.Getenv("APP_PORT")))
+	log.Fatal(r.Run(":" + os.Getenv("PORT")))
 }
