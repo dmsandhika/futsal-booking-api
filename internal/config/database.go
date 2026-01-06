@@ -1,9 +1,10 @@
 package config
 
 import (
+	"os"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"os"
 )
 
 func InitDB() *gorm.DB {
@@ -12,7 +13,7 @@ func InitDB() *gorm.DB {
 		" password=" + os.Getenv("DB_PASS") +
 		" dbname=" + os.Getenv("DB_NAME") +
 		" port=" + os.Getenv("DB_PORT") +
-		" sslmode=disable TimeZone=Asia/Jakarta"
+		" sslmode=require"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

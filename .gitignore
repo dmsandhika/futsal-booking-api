@@ -1,2 +1,17 @@
 /uploads/
 .env
+bin/
+*.exe
+*.out
+*.test
+# Go modules
+go.sum
+# Editor folders
+.vscode/
+.idea/
+# Swap files
+*.swp
+*.swo
+# OS files
+Thumbs.db
+.DS_Store
