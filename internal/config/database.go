@@ -13,8 +13,7 @@ func InitDB() *gorm.DB {
 		" password=" + os.Getenv("DB_PASS") +
 		" dbname=" + os.Getenv("DB_NAME") +
 		" port=" + os.Getenv("DB_PORT") +
-		" sslmode=require" +
-		" search_path=" + os.Getenv("DB_SCHEMA")
+		" sslmode=require"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
