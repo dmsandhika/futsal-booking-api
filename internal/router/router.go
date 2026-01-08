@@ -12,6 +12,7 @@ func SetupCourtRoutes(r *gin.Engine,
 	authHandler *handler.AuthHandler,
 	courtHandler *handler.CourtHandler,
 	bookingHandler *handler.BookingHandler,
+	closeDateHandler *handler.CloseDateHandler,
 ) {
 	auth := r.Group("/auth")
 	{
@@ -33,6 +34,11 @@ func SetupCourtRoutes(r *gin.Engine,
 		bookings.POST("/", bookingHandler.CreateBooking)
 		bookings.PUT("/:id/payment-status", bookingHandler.UpdatePaymentStatus)
 		bookings.PUT("/:id/cancel", bookingHandler.CancelBooking)
-
+	}
+	close_dates := r.Group("/close-dates")
+	{
+		close_dates.GET("/", closeDateHandler.GetAllCloseDates)
+		close_dates.POST("/", closeDateHandler.CreateCloseDate)
+		close_dates.DELETE("/", closeDateHandler.DeleteCloseDate)
 	}
 }

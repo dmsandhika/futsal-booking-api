@@ -11,8 +11,9 @@ import (
 )
 
 type BookingHandler struct {
-	Repo      *repository.BookingRepository
-	CourtRepo *repository.CourtRepository
+	Repo          *repository.BookingRepository
+	CourtRepo     *repository.CourtRepository
+	CloseDateRepo *repository.CloseDateRepository
 }
 
 type BookingRequest struct {
@@ -113,8 +114,18 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		return
 	}
 
-	// Cek booking duplikat
 	bookingDate := parseDate(req.BookingDate)
+	
+	isClosed, err := h.CloseDateRepo.IsDateClosed(bookingDate)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if isClosed {
+		c.JSON(400, gin.H{"error": "Tanggal pemesanan adalah tanggal libur, tidak bisa membuat booking"})
+		return
+	}
+	
 	existing, _, err := h.Repo.GetBookings(&courtUUID, &bookingDate, req.TimeSlot, 100, 0)
 	for _, b := range existing {
 		if b.TimeSlot == req.TimeSlot && b.Status != model.StatusCancelled {
