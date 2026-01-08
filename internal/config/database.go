@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 
 	"gorm.io/driver/postgres"
@@ -18,8 +19,10 @@ func InitDB() *gorm.DB {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("Failed to connect database")
+		log.Fatal("Failed to connect database:", err)
 	}
+	
+	log.Println("Database connected successfully")
 	
 	// Ensure schema exists and set search path
 	db.Exec("CREATE SCHEMA IF NOT EXISTS " + os.Getenv("DB_SCHEMA"))

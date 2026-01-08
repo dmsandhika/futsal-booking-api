@@ -18,7 +18,9 @@ func main() {
 	godotenv.Load()
 
 	db := config.InitDB()
-	db.AutoMigrate(&model.Court{}, &model.Admin{}, &model.Booking{}, &model.CloseDate{})
+	if err := db.AutoMigrate(&model.Court{}, &model.Admin{}, &model.Booking{}, &model.CloseDate{}); err != nil {
+		log.Fatal("Failed to migrate database:", err)
+	}
 
 	courtRepo := &repository.CourtRepository{DB: db}
 	courtHandler := &handler.CourtHandler{Repo: courtRepo}
