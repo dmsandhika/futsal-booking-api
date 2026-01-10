@@ -17,7 +17,9 @@ func InitDB() *gorm.DB {
 		" sslmode=require" +
 		" options=-csearch_path=" + os.Getenv("DB_SCHEMA")
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		PrepareStmt: false, 
+	})
 	if err != nil {
 		log.Fatal("Failed to connect database:", err)
 	}
