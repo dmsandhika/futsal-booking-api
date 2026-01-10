@@ -1,5 +1,5 @@
 CREATE TABLE bookings (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     court_id UUID NOT NULL,
     booking_date DATE NOT NULL,
     time_slot VARCHAR(50) NOT NULL,
