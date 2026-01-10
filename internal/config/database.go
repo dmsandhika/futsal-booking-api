@@ -15,17 +15,16 @@ func InitDB() *gorm.DB {
 		" dbname=" + os.Getenv("DB_NAME") +
 		" port=" + os.Getenv("DB_PORT") +
 		" sslmode=require" +
-		" options=-csearch_path=" + os.Getenv("DB_SCHEMA")
+		" options=--search_path=" + os.Getenv("DB_SCHEMA")
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		PrepareStmt: false, 
-	})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect database:", err)
 	}
 	
 	log.Println("Database connected successfully")
-	
+	db.Exec("CREATE SCHEMA IF NOT EXISTS " + os.Getenv("DB_SCHEMA"))
+	db.Exec("SET search_path TO " + os.Getenv("DB_SCHEMA"))
 	return db
 
 	//migrate -path migrations -database "postgres://postgres:PASS@$localhost:5432/futsal_db?sslmode=require&search_path=public" up
