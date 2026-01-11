@@ -25,20 +25,20 @@ func SetupCourtRoutes(r *gin.Engine,
 		courts.GET("/", courtHandler.GetAllCourts)
 		courts.POST("/", courtHandler.CreateCourt)
 		courts.GET("/:id", courtHandler.GetCourtByID)
-		courts.PUT("/:id", courtHandler.UpdateCourt)
-		courts.DELETE("/:id", courtHandler.DeleteCourt)
+		courts.PUT("/:id", middleware.JWTAuth(),courtHandler.UpdateCourt)
+		courts.DELETE("/:id", middleware.JWTAuth(), courtHandler.DeleteCourt)
 	}
 	bookings := r.Group("/bookings")
 	{
 		bookings.GET("/", bookingHandler.GetBookings)
 		bookings.POST("/", bookingHandler.CreateBooking)
-		bookings.PUT("/:id/payment-status", bookingHandler.UpdatePaymentStatus)
-		bookings.PUT("/:id/cancel", bookingHandler.CancelBooking)
+		bookings.PUT("/:id/payment-status", middleware.JWTAuth(), bookingHandler.UpdatePaymentStatus)
+		bookings.PUT("/:id/cancel", middleware.JWTAuth(), bookingHandler.CancelBooking)
 	}
 	close_dates := r.Group("/close-dates")
 	{
 		close_dates.GET("/", closeDateHandler.GetAllCloseDates)
-		close_dates.POST("/", closeDateHandler.CreateCloseDate)
-		close_dates.DELETE("/", closeDateHandler.DeleteCloseDate)
+		close_dates.POST("/", middleware.JWTAuth(), closeDateHandler.CreateCloseDate)
+		close_dates.DELETE("/", middleware.JWTAuth(), closeDateHandler.DeleteCloseDate)
 	}
 }
