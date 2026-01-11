@@ -13,7 +13,7 @@ type Booking struct {
 	BookingDate     time.Time `gorm:"type:date"`
 	TimeSlot        string    `gorm:"type:varchar(20)"`
 	CustomerName    string    `gorm:"type:varchar(100)"`
-	CustomerPhone   string    `gorm:"type:varchar(20)"`
+	CustomerContact string    `gorm:"type:varchar(20)"`
 	CustomerEmail   string    `gorm:"type:varchar(100);null"`
 	TotalPrice      int
 	PaymentType     PaymentType `gorm:"type:varchar(50)"`

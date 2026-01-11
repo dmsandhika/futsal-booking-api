@@ -21,7 +21,7 @@ type BookingRequest struct {
 	BookingDate   string `json:"booking_date"`
 	TimeSlot      string `json:"time_slot"`
 	CustomerName  string `json:"customer_name"`
-	CustomerPhone string `json:"customer_phone"`
+	CustomerContact string `json:"customer_contact"`
 	TotalPrice    int    `json:"total_price"`
 	PaymentType   string `json:"payment_type"`
 	AmountPaid    int    `json:"amount_paid"`
@@ -146,7 +146,7 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		BookingDate:     parseDate(req.BookingDate),
 		TimeSlot:        req.TimeSlot,
 		CustomerName:    req.CustomerName,
-		CustomerPhone:   req.CustomerPhone,
+		CustomerContact:   req.CustomerContact,
 		TotalPrice:      req.TotalPrice,
 		PaymentType:     model.PaymentType(req.PaymentType),
 		AmountPaid:      req.AmountPaid,

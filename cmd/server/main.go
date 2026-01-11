@@ -11,6 +11,7 @@ import (
 	"futsal-booking/internal/handler"
 	"futsal-booking/internal/repository"
 	"futsal-booking/internal/router"
+	"futsal-booking/internal/scheduler"
 )
 
 func main() {
@@ -31,6 +32,7 @@ func main() {
 		CloseDateRepo: closeDateRepo,
 	}
 
+	scheduler.Start(db)
 	r := gin.Default()
 	r.Static("/uploads", "./uploads")
 	router.SetupCourtRoutes(r, authHandler, courtHandler, bookingHandler, closeDateHandler)
