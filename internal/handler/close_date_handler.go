@@ -60,3 +60,25 @@ func (h *CloseDateHandler) DeleteCloseDate(c *gin.Context) {
 
 	c.JSON(200, gin.H{"message": "close date deleted"})
 }
+
+func (h *CloseDateHandler) IsDateClosed(c *gin.Context) {
+
+	dateStr := c.Query("date")
+	if dateStr == "" || dateStr == "today" {
+		dateStr = time.Now().Format("2006-01-02")
+	}
+
+	date, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid date format"})
+		return
+	}
+
+	isClosed, err := h.Repo.IsDateClosed(date)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"date": dateStr, "is_closed": isClosed})
+}

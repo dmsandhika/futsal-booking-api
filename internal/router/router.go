@@ -40,5 +40,6 @@ func SetupCourtRoutes(r *gin.Engine,
 		close_dates.GET("/", closeDateHandler.GetAllCloseDates)
 		close_dates.POST("/", middleware.JWTAuth(), closeDateHandler.CreateCloseDate)
 		close_dates.DELETE("/", middleware.JWTAuth(), closeDateHandler.DeleteCloseDate)
+		close_dates.GET("/check", closeDateHandler.IsDateClosed)
 	}
 }
