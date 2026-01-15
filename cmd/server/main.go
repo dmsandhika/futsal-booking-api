@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
@@ -34,6 +35,11 @@ func main() {
 
 	scheduler.Start(db)
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins: true,
+		AllowMethods: []string{"*"},
+		AllowHeaders: []string{"*"},
+	}))
 	r.Static("/uploads", "./uploads")
 	router.SetupCourtRoutes(r, authHandler, courtHandler, bookingHandler, closeDateHandler)
 	log.Fatal(r.Run(":" + os.Getenv("PORT")))
